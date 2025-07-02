@@ -43,7 +43,7 @@ function App() {
         },
         {
           headers: {
-            Authorization: `Bearer ${apiKey}`,
+            Authorization: `Bearer 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`,
             "Content-Type": "application/json",
           },
         }
