@@ -5,6 +5,8 @@ import axios from "axios";
 function App() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  const apiKey = import.meta.env.VITE_GROQ_API_KEY; // or similar
+  console.log("Groq API Key:", apiKey);
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -41,7 +43,7 @@ function App() {
         },
         {
           headers: {
-            Authorization: `Bearer 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`,
+            Authorization: `Bearer ${apiKey}`,
             "Content-Type": "application/json",
           },
         }
