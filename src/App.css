@@ -130,3 +130,61 @@ body, html, #root {
   color: #718096;
   margin-top: 10px;
 }
+
+.message-actions {
+  margin-top: 5px;
+  display: flex;
+  gap: 8px;
+}
+
+.message-actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.message-actions button:hover {
+  background-color: #ddd;
+}
+
+button.liked {
+  background-color: #c6f6d5; /* light green */
+}
+
+button.disliked {
+  background-color: #feb2b2; /* light red */
+}
+
+.message-actions {
+  margin-top: 5px;
+}
+
+.message-actions button {
+  margin-right: 5px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border: none;
+  border-radius: 4px;
+  background-color: #eee;
+}
+
+.message-actions button:hover {
+  background-color: #ddd;
+}
+
+button.liked {
+  background-color: #c6f6d5; /* light green */
+}
+
+button.disliked {
+  background-color: #feb2b2; /* light red */
+}
+
+.edit-input {
+  width: 100%;
+  padding: 6px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
