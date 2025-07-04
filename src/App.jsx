@@ -5,16 +5,29 @@ import axios from "axios";
 function App() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
-  const apiKey = import.meta.env.VITE_GROQ_API_KEY;
+
+  // ✅ You can replace this with import.meta.env if using .env setup
+  const apiKey = "gsk_XXXXXXXXXXXXXXXXXXXXXXXX";
 
   const handleSend = async (text = input) => {
     if (!text.trim()) return;
 
-    const userMsg = { role: "user", content: text };
+    const pairId = Date.now(); // unique pair ID to match user/bot
+    const userMsg = {
+      role: "user",
+      content: text,
+      editable: false,
+      pairId,
+    };
+
     const updatedMessages = [...messages, userMsg];
     setMessages(updatedMessages);
     setInput("");
 
+    await generateBotReply(updatedMessages, pairId);
+  };
+
+  const generateBotReply = async (chatSoFar, pairId) => {
     const chatHistory = [
       {
         role: "system",
@@ -28,7 +41,10 @@ If unsure, say so. Never give prescriptions.
 
 🔹 End every answer with a friendly reminder and a medical disclaimer.`,
       },
-      ...updatedMessages,
+      ...chatSoFar.map((msg) => ({
+        role: msg.role,
+        content: msg.content,
+      })),
     ];
 
     try {
@@ -55,7 +71,7 @@ If unsure, say so. Never give prescriptions.
         role: "bot",
         content: reply,
         liked: null,
-        editable: false,
+        pairId,
       };
 
       setMessages((prev) => [...prev, botMsg]);
@@ -72,12 +88,6 @@ If unsure, say so. Never give prescriptions.
     }
   };
 
-  const handleLike = (index, value) => {
-    const updated = [...messages];
-    updated[index].liked = value;
-    setMessages(updated);
-  };
-
   const toggleEdit = (index, value) => {
     const updated = [...messages];
     updated[index].editable = value;
@@ -87,6 +97,30 @@ If unsure, say so. Never give prescriptions.
   const handleEditChange = (index, newText) => {
     const updated = [...messages];
     updated[index].content = newText;
+    setMessages(updated);
+  };
+
+  const handleEditFinish = async (index) => {
+    const newMessages = [...messages];
+    const editedMessage = newMessages[index];
+    editedMessage.editable = false;
+
+    const cleanedMessages = newMessages.filter(
+      (msg, i) =>
+        i === index || !(msg.role === "bot" && msg.pairId === editedMessage.pairId)
+    );
+
+    setMessages(cleanedMessages);
+
+    // ✅ Wait 1 tick to ensure state updates before using it
+    setTimeout(() => {
+      generateBotReply(cleanedMessages, editedMessage.pairId);
+    }, 0);
+  };
+
+  const handleLike = (index, value) => {
+    const updated = [...messages];
+    updated[index].liked = value;
     setMessages(updated);
   };
 
@@ -100,34 +134,53 @@ If unsure, say so. Never give prescriptions.
       <div className="chat-box">
         {messages.map((msg, index) => (
           <div key={index} className={`chat-message ${msg.role}`}>
-            {msg.editable ? (
-              <input
-                className="edit-input"
-                value={msg.content}
-                onChange={(e) => handleEditChange(index, e.target.value)}
-                onBlur={() => toggleEdit(index, false)}
-                autoFocus
-              />
+            {msg.role === "user" ? (
+              <>
+                {msg.editable ? (
+                  <input
+                    className="edit-input"
+                    value={msg.content}
+                    onChange={(e) => handleEditChange(index, e.target.value)}
+                    onBlur={() => handleEditFinish(index)}
+                    autoFocus
+                  />
+                ) : (
+                  <div className="message-content">
+                    <strong>You:</strong> {msg.content}
+                  </div>
+                )}
+                <div className="user-actions">
+                  <button
+                    onClick={() => toggleEdit(index, true)}
+                    title="Edit"
+                    className="edit-button"
+                  >
+                    ✏️
+                  </button>
+                </div>
+              </>
             ) : (
-              <div className="message-content">{msg.content}</div>
-            )}
-
-            {msg.role === "bot" && (
-              <div className="message-actions">
-                <button
-                  className={msg.liked === true ? "liked" : ""}
-                  onClick={() => handleLike(index, true)}
-                >
-                  👍
-                </button>
-                <button
-                  className={msg.liked === false ? "disliked" : ""}
-                  onClick={() => handleLike(index, false)}
-                >
-                  👎
-                </button>
-                <button onClick={() => toggleEdit(index, true)}>✏️</button>
-              </div>
+              <>
+                <div className="message-content">
+                  <strong>Bot:</strong> {msg.content}
+                </div>
+                <div className="bot-actions">
+                  <button
+                    className={msg.liked === true ? "liked" : ""}
+                    onClick={() => handleLike(index, true)}
+                    title="Like"
+                  >
+                    👍
+                  </button>
+                  <button
+                    className={msg.liked === false ? "disliked" : ""}
+                    onClick={() => handleLike(index, false)}
+                    title="Dislike"
+                  >
+                    👎
+                  </button>
+                </div>
+              </>
             )}
           </div>
         ))}
@@ -145,8 +198,7 @@ If unsure, say so. Never give prescriptions.
       </div>
 
       <p className="chat-disclaimer">
-        Disclaimer: This chatbot provides general information only. Always
-        consult a healthcare professional for medical advice.
+        Disclaimer: This chatbot provides general information only. Always consult a healthcare professional for medical advice.
       </p>
     </div>
   );

@@ -188,3 +188,47 @@ button.disliked {
   border: 1px solid #ccc;
   border-radius: 4px;
 }
+
+.chat-message {
+  margin: 10px 0;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.message-content {
+  margin-bottom: 4px;
+}
+
+.edit-input {
+  width: 100%;
+  padding: 6px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.bot-actions,
+.user-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+  font-size: 14px;
+}
+
+.bot-actions button,
+.user-actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0;
+  color: gray;
+}
+
+.bot-actions button.liked {
+  color: green;
+}
+
+.bot-actions button.disliked {
+  color: red;
+}
